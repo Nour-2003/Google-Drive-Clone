@@ -7,7 +7,7 @@ abstract class FileSystemEntity {
   String description;
   String parentFolder;
   bool isFolder;
-
+  List<String> tags = [];
   FileSystemEntity({
     required this.name,
     required this.path,

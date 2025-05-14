@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../Cubit/Home Cubit.dart';
+import '../Screens/Folder Details.dart';
+import 'Details Dialog.dart';
 
 Widget homePageList(context) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0),
@@ -27,45 +29,67 @@ Widget homePageList(context) => Padding(
             itemBuilder: (context, index) {
               if (index <folders.length) {
                 // Folder item
-                return Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xffF9FAFB),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Padding(
-                            padding:
-                            EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-                            child: Icon(
-                              Icons.folder,
-                              size: 40,
-                              color: Color(0xff111827),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              folders[index],
-                              overflow: TextOverflow.ellipsis,
-                              style:  GoogleFonts.montserrat(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xff111827),
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FolderInspectPage(
+                          folderName: folders[index]['name'],
+                          children: folders[index]['children'],
+                          path: folders[index]['path'],
+
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xffF9FAFB),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Padding(
+                              padding:
+                              EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+                              child: Icon(
+                                Icons.folder,
+                                size: 40,
+                                color: Color(0xff111827),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.more_vert),
-                            onPressed: () {
-                              // Handle folder options
-                            },
-                          ),
-                        ],
-                      ),
-                      const Icon(Icons.folder, size: 100, color: Color(0xff111827)),
-                    ],
+                            Expanded(
+                              child: Text(
+                                folders[index]['name'],
+                                overflow: TextOverflow.ellipsis,
+                                style:  GoogleFonts.montserrat(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xff111827),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.more_vert),
+                              onPressed: () {
+                                final folder = folders[index];
+                                final renameController = TextEditingController(text: folder['name']);
+                                final tagController = TextEditingController();
+
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => DetailsDialog(File: folder, renameController: renameController, tagController: tagController, index: index),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        const Icon(Icons.folder, size: 100, color: Color(0xff111827)),
+                      ],
+                    ),
                   ),
                 );
               } else {
@@ -102,170 +126,12 @@ Widget homePageList(context) => Padding(
                               final file = files[fileIndex];
                               final renameController = TextEditingController(text: file['filename']);
                               final tagController = TextEditingController();
-
                               showDialog(
                                 context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xffF9FAFB),
-                                  title: Text(
-                                    "File Details",
-                                    style: GoogleFonts.montserrat(
-                                      color: const Color(0xff111827),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Rename
-                                        Text("Rename:", style: GoogleFonts.montserrat(
-                                          fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
-                                        )),
-                                        const SizedBox(height: 6),
-                                        TextField(
-                                          controller: renameController,
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: const Color(0xffE5E7EB),
-                                            hintText: "New filename",
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                              borderSide: BorderSide.none,
-                                            ),
-                                          ),
-                                        ),
-
-                                        const SizedBox(height: 12),
-
-                                        // File Info
-                                        Text("Size: ${_formatFileSize(file['size'])}", style: GoogleFonts.montserrat(
-                                          fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
-                                        )),
-                                        const SizedBox(height: 8),
-                                        Text("Type: ${file['filename'].split('.').last}", style: GoogleFonts.montserrat(
-                                          fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
-                                        )),
-                                        const SizedBox(height: 8),
-                                        Text("Uploaded: ${file['uploadDate']}", style: GoogleFonts.montserrat(
-                                          fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
-                                        )),
-
-                                        const SizedBox(height: 12),
-
-                                        // Tags Section
-                                        Text("Tags:", style: GoogleFonts.montserrat(
-                                          fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
-                                        )),
-                                        const SizedBox(height: 6),
-                                        Wrap(
-                                          spacing: 8,
-                                          runSpacing: 4,
-                                          children: List<Widget>.from(
-                                            (file['tags'] as List<String>).map(
-                                                  (tag) => Chip(
-                                                label: Text(tag),
-                                                backgroundColor: const Color(0xffE5E7EB),
-                                                labelStyle: GoogleFonts.montserrat(
-                                                  color: const Color(0xff111827),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: TextField(
-                                                controller: tagController,
-                                                decoration: InputDecoration(
-                                                  hintText: "Add tag",
-                                                  filled: true,
-                                                  fillColor: const Color(0xffE5E7EB),
-                                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                                  border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    borderSide: BorderSide.none,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                final newTag = tagController.text.trim();
-                                                if (newTag.isNotEmpty) {
-                                                  (file['tags'] as List<String>).add(newTag);
-                                                  tagController.clear();
-                                                  Navigator.pop(context);
-                                                  Future.delayed(Duration.zero, () {
-                                                    // Reopen updated dialog
-                                                    (context as Element).reassemble(); // Optional: refresh UI
-                                                  });
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: const Color(0xffE5E7EB),
-                                              ),
-                                              child: const Icon(Icons.add, color: Color(0xff111827)),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  actions: [
-                                    // Delete
-                                    TextButton(
-                                      onPressed: () {
-                                        HomeCubit.get(context).deleteFile(fileIndex);
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text(
-                                        "Delete",
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ),
-                                    // Save Rename
-                                    TextButton(
-                                      onPressed: () {
-                                        final newName = renameController.text.trim();
-                                        if (newName.isNotEmpty) {
-                                          HomeCubit.get(context).renameFile(fileIndex, newName);
-                                        }
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text(
-                                        "Save",
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.green[700],
-                                        ),
-                                      ),
-                                    ),
-                                    // Close
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(
-                                        "Close",
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                builder: (context) => DetailsDialog(File: file,
+                                  renameController: renameController,
+                                  tagController: tagController,
+                                  index: fileIndex,
                                 ),
                               );
                             },
@@ -284,13 +150,7 @@ Widget homePageList(context) => Padding(
       ),
     );
 
-String _formatFileSize(int bytes) {
-  if (bytes < 1024) return "$bytes B";
-  if (bytes < 1024 * 1024) return "${(bytes / 1024).toStringAsFixed(1)} KB";
-  if (bytes < 1024 * 1024 * 1024)
-    return "${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB";
-  return "${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB";
-}
+
 
 // Helper function to get icon based on file extension
 Icon _getFileIcon(String fileName,bool smallIcon) {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'Home/Cubit/Home Cubit.dart';
-import 'Home/UI/Home Page.dart';
+import 'Home/UI/Screens/Home Page.dart';
 
 void main() {
   runApp(const MyApp());
