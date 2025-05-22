@@ -220,17 +220,17 @@ class _CreateFileDialogState extends State<CreateFileDialog> {
                           }
 
                           Navigator.pop(context, {
-                            'filename': selectedFile!.name,
+                            'name': selectedFile!.name,
                             'tags':widget.tagsController.text
                                 .split(RegExp(r'[,\s;]+'))
                                 .map((e) => e.trim())
                                 .where((e) => e.isNotEmpty) // optional: remove empty entries
                                 .toList(),
                             'description': widget.descriptionController.text,
-                            'name': widget.nameController.text,
                             'size': selectedFile!.size,
-                            'path': selectedFile!.path,
+                            'path': '/${selectedFile!.name}',
                             'uploadDate': DateTime.now(),
+                            'isFolder': false,
                           });
                         },
                         child: Text(

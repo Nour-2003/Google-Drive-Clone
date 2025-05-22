@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../UI/Widgets/File Dialog.dart';
 
@@ -13,41 +14,48 @@ class HomeCubit extends Cubit<HomeStates> {
 
   static HomeCubit get(context) => BlocProvider.of(context);
 
+  List<Map<String, dynamic>> allItems = [];
+  List<Map<String, dynamic>> filteredItems = [];
+
   void loadMockData() {
-    folders = [
+    allItems = [
       {
         'name': 'Work',
         'path': '/Work',
         'type': 'folder',
         'size': 0,
+        'isFolder': true,
         'children': [
           {
             'name': 'Subfolder 1',
             'path': '/Work/Subfolder 1',
             'size': 0,
-            'children': [],
+            'children': List<Map<String, dynamic>>.empty(),
             'isFolder': true,
             'tags': ['work', 'subfolder'],
             'date': '2025-05-01',
             'description': '',
             'parentFolder': '/Work',
+            'sharedWith': ['team1@company.com', 'manager@company.com'],
           },
           {
             'name': 'Subfolder 2',
             'path': '/Work/Subfolder 2',
             'size': 0,
-            'children': [],
+            'children': List<Map<String, dynamic>>.empty(),
             'isFolder': true,
             'tags': ['work', 'subfolder'],
             'date': '2025-05-01',
             'description': '',
             'parentFolder': '/Work',
+            'sharedWith': ['team2@company.com'],
           }
         ],
         'tags': ['work', 'office'],
         'date': '2025-05-01',
         'description': '',
         'parentFolder': '/',
+        'sharedWith': ['ceo@company.com', 'hr@company.com'],
       },
       {
         'name': 'Personal',
@@ -59,108 +67,146 @@ class HomeCubit extends Cubit<HomeStates> {
         'date': '2025-04-15',
         'description': '',
         'parentFolder': '/',
+        'sharedWith': ['family@home.com'],
       },
       {
         'name': 'Projects',
         'path': '/Projects',
         'size': 0,
+        'isFolder': true,
         'children': [
           {
-            'name':'File 1.jpg',
-            'path': '/Projects/File 1',
-            'isFolder':false,
+            'name': 'File 1.jpg',
+            'path': '/Projects/File 1.jpg',
+            'isFolder': false,
             'size': 14,
             'tags': ['projects', 'work'],
             'date': '2025-03-30',
-            'description': ' This is a file description',
-
+            'description': 'This is a file description',
+            'sharedWith': ['designer@company.com'],
           },
           {
-            'name':'File 2.docx',
-            'path': '/Projects/File 2',
-            'isFolder':false,
+            'name': 'File 2.docx',
+            'path': '/Projects/File 2.docx',
+            'isFolder': false,
             'size': 14,
             'tags': ['projects', 'work'],
             'date': '2025-03-30',
-            'description': ' This is a file description',
+            'description': 'This is a file description',
+            'sharedWith': ['developer@company.com', 'qa@company.com'],
           }
         ],
         'tags': ['projects', 'work'],
         'date': '2025-03-30',
         'description': '',
         'parentFolder': '/',
+        'sharedWith': ['project_manager@company.com'],
       },
-    ];
-    files = [
       {
-        'filename': 'Resume.pdf',
-        'size': 1048576, // 1 MB
+        'name': 'Resume.pdf',
+        'isFolder': false,
+        'size': 1048576,
         'uploadDate': '2025-05-01',
         'tags': ['job', 'resume'],
-        'path': '/'
+        'path': '/Resume.pdf',
+        'sharedWith': ['recruiter1@jobs.com', 'recruiter2@jobs.com'],
       },
       {
-        'filename': 'Budget.xlsx',
-        'size': 512000, // 500 KB
+        'name': 'Budget.xlsx',
+        'isFolder': false,
+        'size': 512000,
         'uploadDate': '2025-04-15',
         'tags': ['finance', 'budget'],
-        'path': '/'
+        'path': '/Budget.xlsx',
+        'sharedWith': ['accountant@company.com'],
       },
       {
-        'filename': 'MeetingNotes.txt',
-        'size': 10240, // 10 KB
+        'name': 'MeetingNotes.txt',
+        'isFolder': false,
+        'size': 10240,
         'uploadDate': '2025-03-30',
         'tags': ['meeting', 'notes'],
-        'path': '/'
+        'path': '/MeetingNotes.txt',
+        'sharedWith': ['assistant@company.com'],
       },
     ];
 
-    // Initially, show all folders and files
-    filteredFolders = List.from(folders);
-    filteredFiles = List.from(files);
-
-    emit(HomeDataLoaded()); // emit any state if needed
+    filteredItems = List.from(allItems);
+    emit(HomeDataLoaded());
   }
-
-  List<Map<String, dynamic>> folders = [];
-  List<Map<String, dynamic>> files = [];
-  List<Map<String, dynamic>> filteredFolders = [];
-  List<Map<String, dynamic>> filteredFiles = [];
 
   void searchInDrive(String query) {
     final lowerQuery = query.toLowerCase();
 
     if (query.isEmpty) {
-      filteredFolders = List.from(folders);
-      filteredFiles = List.from(files);
-      emit(HomeSearchState(filteredFolders, filteredFiles));
+      filteredItems = List.from(allItems);
+      emit(HomeSearchState(filteredItems, []));
       return;
     }
 
-    filteredFolders = folders.where((file) {
-      final name = file['name']?.toString().toLowerCase() ?? '';
-      final description = file['description']?.toString().toLowerCase() ?? '';
-      final tags = (file['tags'] as List?)?.cast<String>() ?? [];
+    filteredItems = allItems.where((item) {
+      final name = item['name']?.toString().toLowerCase() ?? '';
+      final description = item['description']?.toString().toLowerCase() ?? '';
+      final tags = (item['tags'] as List?)?.cast<String>() ?? [];
 
       return name.contains(lowerQuery) ||
           tags.any((tag) => tag.toLowerCase().contains(lowerQuery)) ||
           description.contains(lowerQuery);
     }).toList();
 
-    filteredFiles = files.where((file) {
-      final name = file['filename']?.toString().toLowerCase() ?? '';
-      final description = file['description']?.toString().toLowerCase() ?? '';
-      final tags = (file['tags'] as List?)?.cast<String>() ?? [];
+    emit(HomeSearchState(filteredItems, []));
+  }
+  void updateSharedEmails(String itemPath, List<String> emails) {
+    final pathComponents = itemPath.split('/').where((part) => part.isNotEmpty).toList();
+    final updatedItems = List<Map<String, dynamic>>.from(allItems);
 
-      return name.contains(lowerQuery) ||
-          tags.any((tag) => tag.toLowerCase().contains(lowerQuery)) ||
-          description.contains(lowerQuery);
-    }).toList();
+    bool updated = _updateSharedEmailsRecursive(updatedItems, pathComponents, 0, emails);
 
-    emit(HomeSearchState(filteredFolders, filteredFiles));
+    if (updated) {
+      allItems = updatedItems;
+      filteredItems = List.from(allItems);
+      emit(HomeFolderContentUpdatedState(
+        currentPath: itemPath.substring(0, itemPath.lastIndexOf('/')),
+        items: allItems,
+      ));
+    }
   }
 
-  Future<void> pickFile(BuildContext context) async {
+  bool _updateSharedEmailsRecursive(
+      List<Map<String, dynamic>> items,
+      List<String> pathComponents,
+      int currentIndex,
+      List<String> emails,
+      ) {
+    final nameToFind = pathComponents[currentIndex];
+    final itemIndex = items.indexWhere((item) => item['name'] == nameToFind);
+
+    if (itemIndex == -1) return false;
+
+    if (currentIndex == pathComponents.length - 1) {
+      items[itemIndex]['sharedWith'] = List<String>.from(emails);
+      return true;
+    }
+
+    final item = items[itemIndex];
+    if (item['isFolder'] == true && item['children'] != null) {
+      final children = List<Map<String, dynamic>>.from(item['children']);
+      final updated = _updateSharedEmailsRecursive(
+          children,
+          pathComponents,
+          currentIndex + 1,
+          emails
+      );
+
+      if (updated) {
+        items[itemIndex] = {...item, 'children': children};
+        return true;
+      }
+    }
+
+    return false;
+  }
+  Future<void> pickFile(BuildContext context, String parentPath) async {
     final nameController = TextEditingController();
     final tagsController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -178,40 +224,268 @@ class HomeCubit extends Cubit<HomeStates> {
     );
 
     if (fileInfo != null) {
-      filteredFiles.add(fileInfo);
-      emit(HomeAddFileState(List.from(files)));
+      final newFile = {
+        ...fileInfo,
+        'isFolder': false,
+        'path': parentPath == '/'
+            ? '/${fileInfo['name']}'
+            : '$parentPath/${fileInfo['name']}',
+        'parentFolder': parentPath,
+        'sharedWith': <String>[],
+        'date': DateTime.now().toString().substring(0, 10),
+      };
+
+      // If adding at root level
+      if (parentPath == '/') {
+        allItems.add(newFile);
+        filteredItems.add(newFile);
+        emit(HomeFolderContentUpdatedState(
+          currentPath: parentPath,
+          items: List.from(allItems),
+        ));
+        return;
+      }
+
+      // For nested locations
+      final pathComponents =
+          parentPath.split('/').where((part) => part.isNotEmpty).toList();
+      final updatedItems = List<Map<String, dynamic>>.from(allItems);
+      final added = _addFileRecursive(updatedItems, pathComponents, 0, newFile);
+
+      if (added) {
+        allItems = updatedItems;
+        filteredItems = List.from(allItems);
+        emit(HomeFolderContentUpdatedState(
+          currentPath: parentPath,
+          items: List.from(allItems),
+        ));
+      }
     }
   }
 
-  void createFolder(String folderName) {
-    if (folderName.isNotEmpty) {
-      filteredFolders.add({
-        'name': folderName,
-        'path': '/$folderName',
-        'type': 'folder',
-        'size': '0 KB',
-        'date': DateTime.now().toString(),
-        'description': '',
-        'parentFolder': '/',
-      });
-      emit(HomeAddFolderState(List.from(folders)));
+  bool _addFileRecursive(
+    List<Map<String, dynamic>> items,
+    List<String> pathComponents,
+    int currentIndex,
+    Map<String, dynamic> newFile,
+  ) {
+    // If we've reached the target parent folder
+    if (currentIndex == pathComponents.length) {
+      items.add(newFile);
+      return true;
+    }
+
+    final currentFolderName = pathComponents[currentIndex];
+    final folderIndex = items.indexWhere(
+      (item) => item['name'] == currentFolderName && item['isFolder'] == true,
+    );
+
+    if (folderIndex == -1) return false;
+
+    final folder = items[folderIndex];
+    final children = List<Map<String, dynamic>>.from(folder['children'] ?? []);
+    final added =
+        _addFileRecursive(children, pathComponents, currentIndex + 1, newFile);
+
+    if (added) {
+      items[folderIndex] = {
+        ...folder,
+        'children': children,
+      };
+      return true;
+    }
+
+    return false;
+  }
+
+  void createFolder(String parentPath, String folderName) {
+    if (folderName.isEmpty) return;
+
+    final newFolder = {
+      'name': folderName,
+      'size': 0,
+      'children': <Map<String, dynamic>>[], // Explicitly typed
+      'isFolder': true,
+      'tags': <String>[],
+      'sharedWith': <String>[],
+      'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      'description': '',
+      'path': parentPath == '/' ? '/$folderName' : '$parentPath/$folderName',
+    };
+
+    if (parentPath == '/') {
+      allItems.add(newFolder);
+      filteredItems.add(newFolder);
+      emit(HomeFolderContentUpdatedState(
+        currentPath: parentPath,
+        items: List<Map<String, dynamic>>.from(allItems),
+      ));
+      return;
+    }
+
+    final pathComponents = parentPath.split('/').where((part) => part.isNotEmpty).toList();
+    final updatedItems = List<Map<String, dynamic>>.from(allItems);
+    final created = _createFolderRecursive(updatedItems, pathComponents, 0, newFolder);
+
+    if (created) {
+      allItems = updatedItems;
+      filteredItems = List<Map<String, dynamic>>.from(allItems);
+      emit(HomeFolderContentUpdatedState(
+        currentPath: parentPath,
+        items: List<Map<String, dynamic>>.from(allItems),
+      ));
     }
   }
 
-  void deleteFile(int index) {
-    filteredFiles.removeAt(index);
-    emit(HomeAddFileState(List.from(files)));
-  }
-
-  void deleteFolder(int index) {
-    filteredFolders.removeAt(index);
-    emit(HomeAddFolderState(List.from(folders)));
-  }
-
-  void renameFile(int index, String newName) {
-    if (newName.isNotEmpty) {
-      filteredFiles[index]['filename'] = newName;
-      emit(HomeAddFileState(List.from(files)));
+  bool _createFolderRecursive(
+    List<Map<String, dynamic>> items,
+    List<String> pathComponents,
+    int currentIndex,
+    Map<String, dynamic> newFolder,
+  ) {
+    // If we've reached the target parent folder
+    if (currentIndex == pathComponents.length) {
+      items.add(newFolder);
+      return true;
     }
+
+    final currentFolderName = pathComponents[currentIndex];
+    final folderIndex = items.indexWhere(
+      (item) => item['name'] == currentFolderName && item['isFolder'] == true,
+    );
+
+    if (folderIndex == -1) return false;
+
+    final folder = items[folderIndex];
+    final children = List<Map<String, dynamic>>.from(folder['children'] ?? []);
+    final created = _createFolderRecursive(
+        children, pathComponents, currentIndex + 1, newFolder);
+
+    if (created) {
+      items[folderIndex] = {
+        ...folder,
+        'children': children,
+      };
+      return true;
+    }
+
+    return false;
+  }
+
+  void deleteFileInFolder(String filePath) {
+    final pathComponents =
+        filePath.split('/').where((part) => part.isNotEmpty).toList();
+
+    if (pathComponents.isEmpty) return;
+
+    final updatedItems = List<Map<String, dynamic>>.from(allItems);
+    final deleted = _deleteFileRecursive(updatedItems, pathComponents, 0);
+
+    if (deleted) {
+      allItems = updatedItems;
+      filteredItems = List.from(allItems);
+
+      emit(HomeFolderContentUpdatedState(
+          currentPath: filePath.substring(0, filePath.lastIndexOf('/')),
+          items: allItems));
+    }
+  }
+
+  bool _deleteFileRecursive(List<Map<String, dynamic>> items,
+      List<String> pathComponents, int currentIndex) {
+    final nameToFind = pathComponents[currentIndex];
+
+    final itemIndex = items.indexWhere((item) => item['name'] == nameToFind);
+
+    if (itemIndex == -1) return false;
+
+    if (currentIndex == pathComponents.length - 1) {
+      items.removeAt(itemIndex);
+      return true;
+    }
+
+    final item = items[itemIndex];
+    if (item['isFolder'] == true && item['children'] != null) {
+      // Create a new mutable list for children
+      final children = List<Map<String, dynamic>>.from(item['children']);
+      final deletedInChild =
+          _deleteFileRecursive(children, pathComponents, currentIndex + 1);
+
+      if (deletedInChild) {
+        items[itemIndex] = {...item, 'children': children};
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  List<Map<String, dynamic>> getFolderContents(String path) {
+    if (path == '/') return allItems;
+
+    final pathComponents =
+        path.split('/').where((part) => part.isNotEmpty).toList();
+    List<Map<String, dynamic>> currentItems = allItems;
+
+    for (final component in pathComponents) {
+      final folder = currentItems.firstWhere(
+        (item) => item['name'] == component && item['isFolder'] == true,
+        orElse: () => {},
+      );
+
+      if (folder.isEmpty) return [];
+      currentItems = List<Map<String, dynamic>>.from(folder['children'] ?? []);
+    }
+
+    return currentItems;
+  }
+
+  void renameItem(String itemPath, String newName) {
+    if (newName.isEmpty) return;
+
+    final pathComponents =
+        itemPath.split('/').where((part) => part.isNotEmpty).toList();
+
+    if (pathComponents.isEmpty) return;
+
+    final updatedItems = List<Map<String, dynamic>>.from(allItems);
+    final renamed =
+        _renameItemRecursive(updatedItems, pathComponents, 0, newName);
+
+    if (renamed) {
+      allItems = updatedItems;
+      filteredItems = List.from(allItems);
+      emit(HomeFolderContentUpdatedState(
+          currentPath: itemPath.substring(0, itemPath.lastIndexOf('/')),
+          items: allItems));
+    }
+  }
+
+  bool _renameItemRecursive(List<Map<String, dynamic>> items,
+      List<String> pathComponents, int currentIndex, String newName) {
+    final nameToFind = pathComponents[currentIndex];
+
+    final itemIndex = items.indexWhere((item) => item['name'] == nameToFind);
+
+    if (itemIndex == -1) return false;
+
+    if (currentIndex == pathComponents.length - 1) {
+      items[itemIndex]['name'] = newName;
+      return true;
+    }
+
+    final item = items[itemIndex];
+    if (item['isFolder'] == true && item['children'] != null) {
+      final children = List<Map<String, dynamic>>.from(item['children']);
+      final renamedInChild = _renameItemRecursive(
+          children, pathComponents, currentIndex + 1, newName);
+
+      if (renamedInChild) {
+        items[itemIndex] = {...item, 'children': children};
+        return true;
+      }
+    }
+
+    return false;
   }
 }

@@ -9,12 +9,16 @@ class DetailsDialog extends StatelessWidget{
   final File;
   final renameController;
   final tagController;
+  final emailController;
   final int index;
+  final List<String> sharedWith;
   DetailsDialog({
     super.key,
     required this.File,
     required this.renameController,
     required this.tagController,
+    required this.emailController,
+    required this.sharedWith,
     required this.index,
   });
 
@@ -23,7 +27,7 @@ class DetailsDialog extends StatelessWidget{
     return AlertDialog(
         backgroundColor: const Color(0xffF9FAFB),
         title: Text(
-          "Folder Details",
+         File['isFolder'] ?"Folder Details" : "File Details",
           style: GoogleFonts.montserrat(
             color: const Color(0xff111827),
             fontSize: 20,
@@ -134,14 +138,99 @@ class DetailsDialog extends StatelessWidget{
                   )
                 ],
               ),
+              const SizedBox(height: 16),
+              Text("Share with:", style: GoogleFonts.montserrat(
+                fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xff111827),
+              )),
+              const SizedBox(height: 6),
+              if (sharedWith.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: List<Widget>.from(
+                    sharedWith.map(
+                          (email) => Chip(
+                        label: Text(email),
+                        backgroundColor: const Color(0xffE5E7EB),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () {
+                          sharedWith.remove(email);
+                          (context as Element).markNeedsBuild();
+                        },
+                        labelStyle: GoogleFonts.montserrat(
+                          color: const Color(0xff111827),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        hintText: "Add email address",
+                        hintStyle: GoogleFonts.montserrat(
+                          color: const Color(0xff6B7280),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xffE5E7EB),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final email = emailController.text.trim();
+                      if (email.isNotEmpty && email.contains('@')) {
+                        if (!sharedWith.contains(email)) {
+                          sharedWith.add(email);
+                          emailController.clear();
+                          (context as Element).markNeedsBuild();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Already shared with $email'),
+                            ),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Please enter a valid email'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffE5E7EB),
+                    ),
+                    child: const Icon(Icons.add, color: Color(0xff111827)),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
         actions: [
-          // Delete
           TextButton(
             onPressed: () {
-              HomeCubit.get(context).deleteFolder(index);
+              HomeCubit.get(context).deleteFileInFolder(File['path']);
               Navigator.pop(context);
             },
             child: Text(
@@ -157,7 +246,7 @@ class DetailsDialog extends StatelessWidget{
             onPressed: () {
               final newName = renameController.text.trim();
               if (newName.isNotEmpty) {
-                // HomeCubit.get(context).renameFolder(index, newName);
+                HomeCubit.get(context).renameItem(File['path'], newName);
               }
               Navigator.pop(context);
             },
@@ -179,7 +268,7 @@ class DetailsDialog extends StatelessWidget{
                 color: Colors.grey[700],
               ),
             ),
-          ),
+          )
         ],
       );
   }

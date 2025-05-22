@@ -28,3 +28,12 @@ class HomeNavigateState extends HomeStates{
 
   HomeNavigateState(this.path);
 }
+class HomeFolderContentUpdatedState extends HomeStates {
+  final String currentPath;
+  final List<Map<String, dynamic>> items;
+
+  HomeFolderContentUpdatedState({
+    required this.currentPath,
+    required this.items,
+  });
+}
