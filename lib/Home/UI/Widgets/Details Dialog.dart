@@ -82,6 +82,11 @@ class DetailsDialog extends StatelessWidget{
                   (File['tags'] as List<String>).map(
                         (tag) => Chip(
                       label: Text(tag),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                      onDeleted: () {
+                        (File['tags'] as List<String>).remove(tag);
+                        (context as Element).markNeedsBuild();
+                      },
                       backgroundColor: const Color(0xffE5E7EB),
                       labelStyle: GoogleFonts.montserrat(
                         color: const Color(0xff111827),

@@ -37,3 +37,10 @@ class HomeFolderContentUpdatedState extends HomeStates {
     required this.items,
   });
 }
+// Add this to your HomeStates.dart
+class HomeFilterState extends HomeStates {
+  final bool showFiles;
+  final bool showFolders;
+
+  HomeFilterState(this.showFiles, this.showFolders);
+}

@@ -1,10 +1,9 @@
-// home_cubit.dart
+
 import 'package:erp_task/Home/Cubit/Home%20States.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../UI/Widgets/File Dialog.dart';
@@ -303,7 +302,7 @@ class HomeCubit extends Cubit<HomeStates> {
     final newFolder = {
       'name': folderName,
       'size': 0,
-      'children': <Map<String, dynamic>>[], // Explicitly typed
+      'children': <Map<String, dynamic>>[],
       'isFolder': true,
       'tags': <String>[],
       'sharedWith': <String>[],
@@ -342,7 +341,6 @@ class HomeCubit extends Cubit<HomeStates> {
     int currentIndex,
     Map<String, dynamic> newFolder,
   ) {
-    // If we've reached the target parent folder
     if (currentIndex == pathComponents.length) {
       items.add(newFolder);
       return true;
@@ -484,5 +482,16 @@ class HomeCubit extends Cubit<HomeStates> {
     }
 
     return false;
+  }
+  void showFilesOnly() {
+    emit(HomeFilterState(true, false));
+  }
+
+  void showFoldersOnly() {
+    emit(HomeFilterState(false, true));
+  }
+
+  void showAllItems() {
+    emit(HomeFilterState(true, true));
   }
 }
