@@ -1,16 +1,20 @@
-# erp_task
+# ERP Task – Flutter File Explorer App
 
-A new Flutter project.
+A Flutter-based file explorer application that allows users to create folders, add and manage files, tag items, rename, share, and filter based on folder or file type.
 
-## Getting Started
+## 🛠️ Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a starting point for a Flutter application focused on local file and folder management.
 
-A few resources to get you started if this is your first Flutter project:
+### 📦 Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 📁 Create folders and nested subfolders
+- 🔍 Search through folders and files by name
+- 📄 Pick files from the local system
+- 🏷️ Add and manage tags for folders/files
+- ✏️ Rename folders and files
+- ✉️ Share files via email
+- 🗂️ Filter content by folders or files
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
