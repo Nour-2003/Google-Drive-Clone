@@ -18,25 +18,3 @@ This project is a starting point for a Flutter application focused on local file
 
 ---
 
-## 📂 Folder & File Structure
-
-```bash
-/lib
-│
-├── models/
-│   ├── file_model.dart
-│   └── folder_model.dart
-│
-├── cubit/
-│   ├── home_cubit.dart
-│   └── home_state.dart
-│
-├── screens/
-│   ├── home_screen.dart
-│   └── file_picker_screen.dart
-│
-├── widgets/
-│   ├── folder_tile.dart
-│   └── file_tile.dart
-│
-└── main.dart
