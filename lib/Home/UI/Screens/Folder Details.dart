@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../Cubit/Home Cubit.dart';
+import '../../Models/Mock Data.dart';
 import '../Widgets/Details Dialog.dart';
 import '../Widgets/Drawer.dart';
 
@@ -119,7 +120,7 @@ class FolderInspectPage extends StatelessWidget {
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
-                                suffixIcon: const Padding(
+                                suffixIcon:Padding(
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Padding(
@@ -127,7 +128,7 @@ class FolderInspectPage extends StatelessWidget {
                                     child: CircleAvatar(
                                       radius: 22,
                                       backgroundImage: NetworkImage(
-                                        'https://media.istockphoto.com/id/1437816897/photo/business-woman-manager-or-human-resources-portrait-for-career-success-company-we-are-hiring.jpg?s=612x612&w=0&k=20&c=tyLvtzutRh22j9GqSGI33Z4HpIwv9vL_MZw_xOE19NQ=',
+                                          profileImage
                                       ),
                                     ),
                                   ),

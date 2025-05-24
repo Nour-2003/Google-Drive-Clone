@@ -1,4 +1,4 @@
-import 'package:erp_task/Home/Models/Mock%20Data.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -131,7 +131,6 @@ class DetailsDialog extends StatelessWidget{
                         tagController.clear();
                         Navigator.pop(context);
                         Future.delayed(Duration.zero, () {
-                          // Reopen updated dialog
                           (context as Element).reassemble(); // Optional: refresh UI
                         });
                       }
@@ -246,7 +245,6 @@ class DetailsDialog extends StatelessWidget{
               ),
             ),
           ),
-          // Save Rename
           TextButton(
             onPressed: () {
               final newName = renameController.text.trim();
@@ -263,7 +261,6 @@ class DetailsDialog extends StatelessWidget{
               ),
             ),
           ),
-          // Close
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(

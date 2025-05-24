@@ -1,5 +1,5 @@
-
 import 'package:erp_task/Home/Cubit/Home%20States.dart';
+import 'package:erp_task/Home/Models/Mock%20Data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,118 +17,7 @@ class HomeCubit extends Cubit<HomeStates> {
   List<Map<String, dynamic>> filteredItems = [];
 
   void loadMockData() {
-    allItems = [
-      {
-        'name': 'Work',
-        'path': '/Work',
-        'type': 'folder',
-        'size': 0,
-        'isFolder': true,
-        'children': [
-          {
-            'name': 'Subfolder 1',
-            'path': '/Work/Subfolder 1',
-            'size': 0,
-            'children': List<Map<String, dynamic>>.empty(),
-            'isFolder': true,
-            'tags': ['work', 'subfolder'],
-            'date': '2025-05-01',
-            'description': '',
-            'parentFolder': '/Work',
-            'sharedWith': ['team1@company.com', 'manager@company.com'],
-          },
-          {
-            'name': 'Subfolder 2',
-            'path': '/Work/Subfolder 2',
-            'size': 0,
-            'children': List<Map<String, dynamic>>.empty(),
-            'isFolder': true,
-            'tags': ['work', 'subfolder'],
-            'date': '2025-05-01',
-            'description': '',
-            'parentFolder': '/Work',
-            'sharedWith': ['team2@company.com'],
-          }
-        ],
-        'tags': ['work', 'office'],
-        'date': '2025-05-01',
-        'description': '',
-        'parentFolder': '/',
-        'sharedWith': ['ceo@company.com', 'hr@company.com'],
-      },
-      {
-        'name': 'Personal',
-        'path': '/Personal',
-        'size': 0,
-        'children': <Map<String, dynamic>>[],
-        'isFolder': true,
-        'tags': ['personal', 'home'],
-        'date': '2025-04-15',
-        'description': '',
-        'parentFolder': '/',
-        'sharedWith': ['family@home.com'],
-      },
-      {
-        'name': 'Projects',
-        'path': '/Projects',
-        'size': 0,
-        'isFolder': true,
-        'children': [
-          {
-            'name': 'File 1.jpg',
-            'path': '/Projects/File 1.jpg',
-            'isFolder': false,
-            'size': 14,
-            'tags': ['projects', 'work'],
-            'date': '2025-03-30',
-            'description': 'This is a file description',
-            'sharedWith': ['designer@company.com'],
-          },
-          {
-            'name': 'File 2.docx',
-            'path': '/Projects/File 2.docx',
-            'isFolder': false,
-            'size': 14,
-            'tags': ['projects', 'work'],
-            'date': '2025-03-30',
-            'description': 'This is a file description',
-            'sharedWith': ['developer@company.com', 'qa@company.com'],
-          }
-        ],
-        'tags': ['projects', 'work'],
-        'date': '2025-03-30',
-        'description': '',
-        'parentFolder': '/',
-        'sharedWith': ['project_manager@company.com'],
-      },
-      {
-        'name': 'Resume.pdf',
-        'isFolder': false,
-        'size': 1048576,
-        'uploadDate': '2025-05-01',
-        'tags': ['job', 'resume'],
-        'path': '/Resume.pdf',
-        'sharedWith': ['recruiter1@jobs.com', 'recruiter2@jobs.com'],
-      },
-      {
-        'name': 'Budget.xlsx',
-        'isFolder': false,
-        'size': 512000,
-        'uploadDate': '2025-04-15',
-        'tags': ['finance', 'budget'],
-        'path': '/Budget.xlsx',
-        'sharedWith': ['accountant@company.com'],
-      },
-      {
-        'name': 'MeetingNotes.txt',
-        'isFolder': false,
-        'size': 10240,
-        'uploadDate': '2025-03-30',
-        'tags': ['meeting', 'notes'],
-        'path': '/MeetingNotes.txt',
-        'sharedWith': ['assistant@company.com'],
-      },
-    ];
+    allItems = mockData;
 
     filteredItems = List.from(allItems);
     emit(HomeDataLoaded());

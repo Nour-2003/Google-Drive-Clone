@@ -16,7 +16,7 @@ class HomeLoadingState extends HomeStates {}
 
 class HomeSearchState extends HomeStates {
   final List<Map<String, dynamic>> searchResults;
-  final String currentSearchPath; // Add this
+  final String currentSearchPath;
 
   HomeSearchState(this.searchResults, this.currentSearchPath);
 }
@@ -37,7 +37,7 @@ class HomeFolderContentUpdatedState extends HomeStates {
     required this.items,
   });
 }
-// Add this to your HomeStates.dart
+
 class HomeFilterState extends HomeStates {
   final bool showFiles;
   final bool showFolders;
