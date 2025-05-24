@@ -10,15 +10,14 @@ class FolderInspectPage extends StatelessWidget {
   final String path;
   final String folderName;
   final List<Map<String, dynamic>> children;
-  final TextEditingController folderNameController = TextEditingController();
 
   FolderInspectPage({
     super.key,
     required this.path,
     required this.folderName,
-    required this.children,
-  });
-
+    required List<dynamic> children, // Accept List<dynamic> in constructor
+  }) : children = children.cast<Map<String, dynamic>>(); // Convert to List<Map>
+  final TextEditingController folderNameController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     // Get the cubit instance
@@ -35,39 +34,30 @@ class FolderInspectPage extends StatelessWidget {
       builder: (context, state) {
         // Get fresh data from cubit on every rebuild
         final currentChildren = homeCubit.getFolderContents(path);
-        final folders = currentChildren.where((item) =>
-        item['isFolder'] == true).toList();
-        final files = currentChildren.where((item) => item['isFolder'] == false)
-            .toList();
+        List<Map<String, dynamic>> displayItems;
 
+        if (state is HomeSearchState && state.currentSearchPath == path) {
+          displayItems = state.searchResults;
+        } else {
+          displayItems = homeCubit.getFolderContents(path);
+        }
+
+        final folders = displayItems.where((item) => item['isFolder'] == true).toList();
+        final files = displayItems.where((item) => item['isFolder'] == false).toList();
         return Scaffold(
           backgroundColor: const Color(0xffE5E7EB),
-          appBar: AppBar(
+          appBar: path == '/'
+              ? null
+              : AppBar(
+            title: Text(
+              folderName,
+              style: GoogleFonts.montserrat(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xff111827),
+              ),
+            ),
             backgroundColor: const Color(0xffF9FAFB),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  folderName,
-                  style: GoogleFonts.montserrat(
-                    color: const Color(0xff111827),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
-                Text(
-                  path,
-                  style: GoogleFonts.montserrat(
-                    color: Colors.grey[700],
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
             elevation: 0,
           ),
           body: Padding(
@@ -83,145 +73,196 @@ class FolderInspectPage extends StatelessWidget {
                 ),
               ),
             )
-                : GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.1,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: folders.length + files.length,
-              itemBuilder: (context, index) {
-                if (index < folders.length) {
-                  final folder = folders[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              FolderInspectPage(
-                                path: '$path/${folder['name']}',
-                                folderName: folder['name'],
-                                children: folder['children'] ?? [],
+                : SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10,bottom: 15),
+                          child: TextFormField(
+                            onChanged: (query) {
+                              HomeCubit.get(context).searchInFolder(query, path);
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                              filled: true,
+                              fillColor: const Color(0xffD2D4D9),
+                              labelText: 'Search in Drive',
+                              labelStyle: GoogleFonts.montserrat(
+                                color: const Color(0xff111827),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
                               ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xffF9FAFB),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 15.0, vertical: 8),
-                                child: Icon(Icons.folder, size: 40,
-                                    color: Color(0xff111827)),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  folder['name'],
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xff111827),
+                              suffixIcon: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Padding(
+                                  padding: EdgeInsets.all(5.0),
+                                  child: CircleAvatar(
+                                    radius: 22,
+                                    backgroundImage: NetworkImage(
+                                      'https://media.istockphoto.com/id/1437816897/photo/business-woman-manager-or-human-resources-portrait-for-career-success-company-we-are-hiring.jpg?s=612x612&w=0&k=20&c=tyLvtzutRh22j9GqSGI33Z4HpIwv9vL_MZw_xOE19NQ=',
+                                    ),
                                   ),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.more_vert),
-                                onPressed: () {
-                                  final renameController = TextEditingController(
-                                      text: folder['name']);
-                                  final tagController = TextEditingController();
-                                  final emailController = TextEditingController();
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        DetailsDialog(
-                                          File: folder,
-                                          renameController: renameController,
-                                          tagController: tagController,
-                                          emailController: emailController,
-                                          sharedWith: folder['sharedWith'],
-                                          index: index,
-                                        ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          const Icon(Icons.folder, size: 100,
-                              color: Color(0xff111827)),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  final fileIndex = index - folders.length;
-                  final file = files[fileIndex];
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xffF9FAFB),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12.0, vertical: 8),
-                              child: _getFileIcon(file['name'], true),
-                            ),
-                            Expanded(
-                              child: Text(
-                                file['name'],
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xff111827),
+                              prefixIcon: Builder(
+                                builder: (context) => IconButton(
+                                  icon: const Icon(Icons.menu),
+                                  onPressed: () {
+                                    Scaffold.of(context).openDrawer();
+                                  },
                                 ),
                               ),
+                              border: const OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(25)),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.more_vert),
-                              onPressed: () {
-                                final renameController = TextEditingController(
-                                    text: file['name']);
-                                final tagController = TextEditingController();
-                                final emailController = TextEditingController();
-                                showDialog(
-                                  context: context,
-                                  builder: (context) =>
-                                      DetailsDialog(
-                                        File: file,
-                                        renameController: renameController,
-                                        tagController: tagController,
-                                        emailController: emailController,
-                                        sharedWith: file['sharedWith'],
-                                        index: fileIndex,
-                                      ),
-                                );
-                              },
-                            ),
-                          ],
+                          ),
                         ),
-                        _getFileIcon(file['name'], false),
+                        GridView.builder(
+                                      shrinkWrap: true,
+                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.1,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                                      ),
+                                      itemCount: folders.length + files.length,
+                                      itemBuilder: (context, index) {
+                        if (index < folders.length) {
+                          final folder = folders[index];
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      FolderInspectPage(
+                                        path: '$path/${folder['name']}',
+                                        folderName: folder['name'],
+                                        children: folder['children'] ?? [],
+                                      ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xffF9FAFB),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 15.0, vertical: 8),
+                                        child: Icon(Icons.folder, size: 40,
+                                            color: Color(0xff111827)),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          folder['name'],
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xff111827),
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.more_vert),
+                                        onPressed: () {
+                                          final renameController = TextEditingController(
+                                              text: folder['name']);
+                                          final tagController = TextEditingController();
+                                          final emailController = TextEditingController();
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                DetailsDialog(
+                                                  File: folder,
+                                                  renameController: renameController,
+                                                  tagController: tagController,
+                                                  emailController: emailController,
+                                                  sharedWith: folder['sharedWith'],
+                                                  index: index,
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const Icon(Icons.folder, size: 100,
+                                      color: Color(0xff111827)),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else {
+                          final fileIndex = index - folders.length;
+                          final file = files[fileIndex];
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xffF9FAFB),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12.0, vertical: 8),
+                                      child: _getFileIcon(file['name'], true),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        file['name'],
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xff111827),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.more_vert),
+                                      onPressed: () {
+                                        final renameController = TextEditingController(
+                                            text: file['name']);
+                                        final tagController = TextEditingController();
+                                        final emailController = TextEditingController();
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) =>
+                                              DetailsDialog(
+                                                File: file,
+                                                renameController: renameController,
+                                                tagController: tagController,
+                                                emailController: emailController,
+                                                sharedWith: file['sharedWith'],
+                                                index: fileIndex,
+                                              ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                _getFileIcon(file['name'], false),
+                              ],
+                            ),
+                          );
+                        }
+                                      },
+                                    ),
                       ],
                     ),
-                  );
-                }
-              },
-            ),
+                  ),
+                ),
           ),
           floatingActionButton: Column(
             mainAxisAlignment: MainAxisAlignment.end,

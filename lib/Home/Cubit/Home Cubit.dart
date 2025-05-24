@@ -61,7 +61,7 @@ class HomeCubit extends Cubit<HomeStates> {
         'name': 'Personal',
         'path': '/Personal',
         'size': 0,
-        'children': [],
+        'children': <Map<String, dynamic>>[],
         'isFolder': true,
         'tags': ['personal', 'home'],
         'date': '2025-04-15',
@@ -135,16 +135,18 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(HomeDataLoaded());
   }
 
-  void searchInDrive(String query) {
+  void searchInFolder(String query, String currentPath) {
     final lowerQuery = query.toLowerCase();
 
     if (query.isEmpty) {
-      filteredItems = List.from(allItems);
-      emit(HomeSearchState(filteredItems, []));
+      filteredItems = getFolderContents(currentPath);
+      emit(HomeSearchState(filteredItems, currentPath));
       return;
     }
 
-    filteredItems = allItems.where((item) {
+    final currentFolderContents = getFolderContents(currentPath);
+
+    filteredItems = currentFolderContents.where((item) {
       final name = item['name']?.toString().toLowerCase() ?? '';
       final description = item['description']?.toString().toLowerCase() ?? '';
       final tags = (item['tags'] as List?)?.cast<String>() ?? [];
@@ -154,7 +156,7 @@ class HomeCubit extends Cubit<HomeStates> {
           description.contains(lowerQuery);
     }).toList();
 
-    emit(HomeSearchState(filteredItems, []));
+    emit(HomeSearchState(filteredItems, currentPath));
   }
   void updateSharedEmails(String itemPath, List<String> emails) {
     final pathComponents = itemPath.split('/').where((part) => part.isNotEmpty).toList();
@@ -235,7 +237,6 @@ class HomeCubit extends Cubit<HomeStates> {
         'date': DateTime.now().toString().substring(0, 10),
       };
 
-      // If adding at root level
       if (parentPath == '/') {
         allItems.add(newFile);
         filteredItems.add(newFile);
@@ -246,7 +247,6 @@ class HomeCubit extends Cubit<HomeStates> {
         return;
       }
 
-      // For nested locations
       final pathComponents =
           parentPath.split('/').where((part) => part.isNotEmpty).toList();
       final updatedItems = List<Map<String, dynamic>>.from(allItems);
@@ -269,7 +269,6 @@ class HomeCubit extends Cubit<HomeStates> {
     int currentIndex,
     Map<String, dynamic> newFile,
   ) {
-    // If we've reached the target parent folder
     if (currentIndex == pathComponents.length) {
       items.add(newFile);
       return true;
@@ -421,15 +420,14 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   List<Map<String, dynamic>> getFolderContents(String path) {
-    if (path == '/') return allItems;
+    if (path == '/') return List<Map<String, dynamic>>.from(allItems);
 
-    final pathComponents =
-        path.split('/').where((part) => part.isNotEmpty).toList();
+    final pathComponents = path.split('/').where((part) => part.isNotEmpty).toList();
     List<Map<String, dynamic>> currentItems = allItems;
 
     for (final component in pathComponents) {
       final folder = currentItems.firstWhere(
-        (item) => item['name'] == component && item['isFolder'] == true,
+            (item) => item['name'] == component && item['isFolder'] == true,
         orElse: () => {},
       );
 
@@ -439,7 +437,6 @@ class HomeCubit extends Cubit<HomeStates> {
 
     return currentItems;
   }
-
   void renameItem(String itemPath, String newName) {
     if (newName.isEmpty) return;
 

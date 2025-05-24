@@ -33,7 +33,9 @@ class MyHomePage extends StatelessWidget {
                 child: Column(
                   children: [
                     TextFormField(
-                      onChanged: HomeCubit.get(context).searchInDrive,
+                      onChanged: (query) {
+                        HomeCubit.get(context).searchInFolder(query, '/');
+                      },
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(vertical: 15),
                         filled: true,

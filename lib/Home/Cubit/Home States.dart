@@ -15,10 +15,10 @@ class HomeAddFileState extends HomeStates {
 class HomeLoadingState extends HomeStates {}
 
 class HomeSearchState extends HomeStates {
-  final List<Map<String, dynamic>> folders;
-  final List<Map<String, dynamic>> files;
+  final List<Map<String, dynamic>> searchResults;
+  final String currentSearchPath; // Add this
 
-  HomeSearchState(this.folders, this.files);
+  HomeSearchState(this.searchResults, this.currentSearchPath);
 }
 class HomeDataLoaded extends HomeStates{
 
